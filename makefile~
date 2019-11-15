@@ -1,0 +1,3 @@
+compileandrun:
+	mvn compile
+	java -cp src/main/ AppPack.Driver

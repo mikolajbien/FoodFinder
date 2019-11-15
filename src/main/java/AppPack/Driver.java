@@ -6,9 +6,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
- 
+import javafx.geometry.Insets; 
 public class Driver extends Application {
     public static void main(String[] args) {
         launch(args);
@@ -20,8 +20,10 @@ public class Driver extends Application {
        
 
         
-        StackPane root = new StackPane();
-
+        BorderPane root = new BorderPane();
+	
+	
+	FoodFinder app = new FoodFinder(root);
         primaryStage.setScene(new Scene(root, 750, 750));
         primaryStage.show();
     }
