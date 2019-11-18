@@ -17,13 +17,13 @@ public class Driver extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("A Food Price Checker");
-       
+	primaryStage.setResizable(false);
 
         
         BorderPane root = new BorderPane();
 	
 	
-	FoodFinder app = new FoodFinder(root);
+	FoodFinder app = new FoodFinder(root, primaryStage);
         primaryStage.setScene(new Scene(root, 750, 750));
         primaryStage.show();
     }
