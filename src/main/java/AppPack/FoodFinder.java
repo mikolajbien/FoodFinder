@@ -11,6 +11,10 @@ import javafx.geometry.Pos;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 public class FoodFinder{
     private BorderPane appPane;
     
@@ -33,6 +37,15 @@ public class FoodFinder{
 		@Override
 		public void handle(ActionEvent e){
 		    System.out.println("pressed about");
+		    BorderPane rootOfAbout = new BorderPane();
+		    VBox textBox = new VBox();
+		    Label label1 = new Label("A food finder app by Mikolaj Bien");
+		    textBox.getChildren().add(label1);
+		    rootOfAbout.setTop(textBox);
+		    Stage aboutWindow = new Stage();
+		    aboutWindow.initModality(Modality.APPLICATION_MODAL);
+		    aboutWindow.setScene(new Scene(rootOfAbout, 250, 250));
+		    aboutWindow.show();
 		}
 	    });
 	fileMenu.getItems().addAll(about, close);//adds options for the file menu
@@ -44,5 +57,8 @@ public class FoodFinder{
 	top.getChildren().addAll(topMenu, welcomeMsg);
 	
 	this.appPane.setTop(top);
+    }
+    private void SetupMid(){
+	
     }
 }
