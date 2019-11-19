@@ -6,6 +6,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -22,6 +23,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.application.HostServices;
 import javafx.stage.StageStyle;
+import javafx.scene.control.ComboBox;
 public class FoodFinder{
     private BorderPane appPane;
     private Stage mainStage;
@@ -31,6 +33,7 @@ public class FoodFinder{
 	this.appPane = pane;
 	this.mainStage = primaryStage;
        	setupTop();
+	setupMid();
     }
     private void setupTop(){
 	VBox top = new VBox(15);//container for the top part of the application
@@ -54,21 +57,26 @@ public class FoodFinder{
 		    aboutText.setFont(new Font(15));
 		    Button closeButton = new Button("Close");
 		    Button sourceCode = new Button("Source Code");
+		    //size for the buttons
 		    closeButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 		    closeButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 		    HBox Buttons = new HBox(30);//container for buttons
 		    Buttons.setAlignment(Pos.CENTER);
 		    Buttons.getChildren().addAll(closeButton, sourceCode);
 		    rootOfAbout.getChildren().addAll(aboutText, Buttons);
-		    
+
+		    //settings for the new window
 		    Stage aboutWindow = new Stage();
 		    aboutWindow.setResizable(false);
 		    aboutWindow.setTitle("About");
 		    aboutWindow.initModality(Modality.WINDOW_MODAL);
+		    aboutWindow.initOwner(mainStage);
 		    aboutWindow.setScene(new Scene(rootOfAbout));
 		    //make sure the new window opens on where the parent window is
 		    aboutWindow.setX(mainStage.getX() + 50);
 		    aboutWindow.setY(mainStage.getY() + 300);
+		    //end window settings
+		    
 		    sourceCode.setOnAction(e1 ->{//open github
 			    try{
 				Desktop.getDesktop().browse(new URI("https://github.com/mikolajbien/FoodFinder"));}
@@ -97,7 +105,24 @@ public class FoodFinder{
 	
 	this.appPane.setTop(top);
     }
-    private void SetupMid(){
-	
+    private void setupMid(){
+	GridPane mid = new GridPane();//root for middle
+	mid.setPadding(new Insets(15,10,25,20));
+
+
+	Text groceryText = new Text("Grocery Item: ");
+	ComboBox<String> foodSelection = new ComboBox<String>();
+	foodSelection.getItems().addAll("Onions", "Green Pepper", "Apples");
+
+	Button searchButton = new Button("Search");
+	//TODO
+
+	mid.setVgap(10);
+	mid.setHgap(5);
+	mid.add(groceryText, 0, 4);
+	mid.add(foodSelection, 1, 4);
+	mid.add(searchButton,4, 4);
+	    
+	this.appPane.setCenter(mid);
     }
 }

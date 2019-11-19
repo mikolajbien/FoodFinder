@@ -24,7 +24,7 @@ public class Driver extends Application {
 	
 	
 	FoodFinder app = new FoodFinder(root, primaryStage);
-        primaryStage.setScene(new Scene(root, 750, 750));
+        primaryStage.setScene(new Scene(root, 675, 500));
         primaryStage.show();
     }
 }
