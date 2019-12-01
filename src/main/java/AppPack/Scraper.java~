@@ -1,0 +1,57 @@
+package AppPack;
+import org.jsoup.Jsoup;
+import org.jsoup.Connection.Response;
+import org.jsoup.Connection;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
+public class Scraper{
+
+
+  
+    public Scraper(){
+
+
+
+
+
+	
+	
+
+	
+    }
+    public String queryDatabase(String item){
+	String url = "https://www.nutritionvalue.org/";
+	Connection.Response resp = null;
+	Document respDoc = null;
+	try{
+	   resp= Jsoup.connect(url).method(Connection.Method.GET).execute();
+	   respDoc = resp.parse();
+	}catch(java.io.IOException e){
+	    e.printStackTrace();
+	}
+
+	FormElement form = (FormElement)respDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > form");
+	Element searchField = form.selectFirst("#food_query");
+	searchField.val(item);
+	System.out.println(searchField);
+	
+	Connection.Response results = null;
+	Document resultsDoc = null;
+	try{
+	    results = form.submit().execute();
+	    resultsDoc = results.parse();
+	}catch(java.io.IOException e){
+	    e.printStackTrace();
+	}
+
+	Element firstRowOfResult = resultsDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2)");
+	Element resultText = firstRowOfResult.selectFirst("td.results.left");
+	Element linkToInfo = resultText.selectFirst("a");
+	System.out.println(linkToInfo);
+	String Link = linkToInfo.absUrl("href");
+	System.out.println(Link);
+	return item;
+			     
+    }
+}

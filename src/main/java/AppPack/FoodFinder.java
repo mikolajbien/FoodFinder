@@ -29,11 +29,13 @@ public class FoodFinder{
     private Stage mainStage;
     private static final double BUTTON_WIDTH = 60;
     private static final double BUTTON_HEIGHT = 30;
-    public FoodFinder(BorderPane pane, Stage primaryStage){
+   
+    protected FoodFinder(BorderPane pane, Stage primaryStage){
 	this.appPane = pane;
 	this.mainStage = primaryStage;
-       	setupTop();
+	setupTop();
 	setupMid();
+	
     }
     private void setupTop(){
 	VBox top = new VBox(15);//container for the top part of the application
@@ -115,6 +117,10 @@ public class FoodFinder{
 	foodSelection.getItems().addAll("Onions", "Green Pepper", "Apples");
 
 	Button searchButton = new Button("Search");
+	searchButton.setOnAction(e ->{//search
+		Scraper scraper = new Scraper();
+		System.out.println(scraper.queryDatabase("Red Bell Pepper"));
+	    });
 	//TODO
 
 	mid.setVgap(10);
