@@ -24,6 +24,7 @@ import javafx.scene.control.Button;
 import javafx.application.HostServices;
 import javafx.stage.StageStyle;
 import javafx.scene.control.ComboBox;
+import java.util.ArrayList;
 public class FoodFinder{
     private BorderPane appPane;
     private Stage mainStage;
@@ -117,9 +118,10 @@ public class FoodFinder{
 	foodSelection.getItems().addAll("Onions", "Green Pepper", "Apples");
 
 	Button searchButton = new Button("Search");
+	
 	searchButton.setOnAction(e ->{//search
 		Scraper scraper = new Scraper();
-		System.out.println(scraper.queryDatabase("Red Bell Pepper"));
+		ArrayList<String> facts = scraper.queryDatabase("red bell pepper");
 	    });
 	//TODO
 

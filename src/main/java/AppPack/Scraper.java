@@ -1,3 +1,4 @@
+
 package AppPack;
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
@@ -5,22 +6,17 @@ import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.FormElement;
+import org.jsoup.select.Elements;
+import java.util.ArrayList;
+import java.util.ListIterator;
 public class Scraper{
 
 
   
     public Scraper(){
-
-
-
-
-
-	
-	
-
 	
     }
-    public String queryDatabase(String item){
+    public ArrayList<String> queryDatabase(String item){
 	String url = "https://www.nutritionvalue.org/";
 	Connection.Response resp = null;
 	Document respDoc = null;
@@ -34,7 +30,7 @@ public class Scraper{
 	FormElement form = (FormElement)respDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > form");
 	Element searchField = form.selectFirst("#food_query");
 	searchField.val(item);
-	System.out.println(searchField);
+	//	System.out.println(searchField);
 	
 	Connection.Response results = null;
 	Document resultsDoc = null;
@@ -48,9 +44,9 @@ public class Scraper{
 	Element firstRowOfResult = resultsDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2)");
 	Element resultText = firstRowOfResult.selectFirst("td.results.left");
 	Element linkToInfo = resultText.selectFirst("a");
-	System.out.println(linkToInfo);
+	//System.out.println(linkToInfo);
 	String Link = linkToInfo.absUrl("href");
-	System.out.println(Link);
+	//System.out.println(Link);
 	Connection.Response infoResp = null;
 	Document infoDoc = null;
 	try{
@@ -59,7 +55,30 @@ public class Scraper{
 	}catch(java.io.IOException e){
 	    e.printStackTrace();
 	}
-	return item;
-			     
+
+	Element table = infoDoc.selectFirst("table.center.zero.wide.fixed table.center.zero");
+	ArrayList<String> Facts = new ArrayList<String>();	
+	for (Element row : table.select("tr")){
+		for(Element td : row.select("td")){
+		    if ((td.text().equals("")) || (td.text().contains("•"))){//skip bars in block and entries with dot
+			continue;
+		    }
+		    else{
+			Facts.add(td.text());//stick text into a list
+			System.out.println(td.text());
+		    }
+		}
+	    }
+	for(ListIterator<String> i = Facts.listIterator(); i.hasNext();){//remove
+	    String s = i.next();
+	    if (s.contains("•")){
+		i.remove();
+	    }
+	    else
+		System.out.println(s);
+	}
+	    
+	return Facts;
+	
     }
 }
