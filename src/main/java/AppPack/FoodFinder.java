@@ -23,9 +23,57 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.application.HostServices;
 import javafx.stage.StageStyle;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.ComboBox;
 import java.util.ArrayList;
+import java.util.ListIterator;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.SimpleStringProperty;
+
+/**
+ * This Class represents an instance of a FoodFinder application
+ * It displays nutrition facts of certain foods
+ */
 public class FoodFinder{
+    public class Nutrient{
+	private String name;
+	private String dailyVal;
+	
+	public Nutrient(String name, String dailyVal){
+	    this.name = name;
+	    this.dailyVal = dailyVal;
+	}
+	public Nutrient(String name){
+	    this.name = name;
+	    this.dailyVal = "N/A";
+	}
+	public String getName(){
+	    return this.name;
+	}
+	public String getDailyVal(){
+	    return this.dailyVal;
+	}
+	
+	public StringProperty nameProperty(){
+	    StringProperty property = new SimpleStringProperty();
+	    property.set(this.name);
+	    return property;
+	}
+	public StringProperty dailyValProperty(){
+	    StringProperty property = new SimpleStringProperty();
+	    property.set(this.dailyVal);
+	    return property;
+	}
+	@Override
+	public boolean equals(Object o){
+	    Nutrient n = (Nutrient)o;
+	    return ((this.name.equals(n.getName())) && (this.dailyVal.equals(n.getDailyVal())));
+	}
+    }
     private BorderPane appPane;
     private Stage mainStage;
     private static final double BUTTON_WIDTH = 60;
@@ -52,11 +100,11 @@ public class FoodFinder{
 	about.setOnAction(new EventHandler<ActionEvent>(){//when the "about" menu item is pressed
 		@Override
 		public void handle(ActionEvent e){
-		    System.out.println("pressed about");
+	    System.out.println("pressed about");
 		    VBox rootOfAbout = new VBox(20);//20 units of spacing
 		    
 		    rootOfAbout.setPadding(new Insets(5,10,15,10));
-		    Text aboutText = new Text("A food finder app by Mikolaj Bien\nSource Code is available by clicking the button bellow");
+		    Text aboutText = new Text("An app to retrieve nutrition facts of foods\nSource Code is available by clicking the button bellow\nAuthor: Mikolaj Bien");
 		    aboutText.setFont(new Font(15));
 		    Button closeButton = new Button("Close");
 		    Button sourceCode = new Button("Source Code");
@@ -101,7 +149,7 @@ public class FoodFinder{
 	fileMenu.getItems().addAll(about, close);//adds options for the file menu
 	MenuBar topMenu = new MenuBar(fileMenu);
 	
-	Text welcomeMsg = new Text("Welcome to FoodPriceComparer!");
+	Text welcomeMsg = new Text("Welcome to Nutrition Facts Checker!");
 	welcomeMsg.setFont(new Font(20));
 
 	top.getChildren().addAll(topMenu, welcomeMsg);
@@ -118,19 +166,44 @@ public class FoodFinder{
 	foodSelection.getItems().addAll("Onions", "Green Pepper", "Apples");
 
 	Button searchButton = new Button("Search");
-	
+	TableView<Nutrient> table = new TableView<Nutrient>();
+	TableColumn<Nutrient, String> nutrientCol = new TableColumn<Nutrient, String>("Nutrient");
+	nutrientCol.setCellValueFactory(new PropertyValueFactory<Nutrient, String>("name"));
+	TableColumn<Nutrient, String> percentCol = new TableColumn("% dv");
+	percentCol.setCellValueFactory(new PropertyValueFactory<Nutrient, String>("dailyVal"));
+	table.getColumns().addAll(nutrientCol, percentCol);//adding column names to the table
+	ObservableList<Nutrient> tableList = FXCollections.observableArrayList();
 	searchButton.setOnAction(e ->{//search
 		Scraper scraper = new Scraper();
-		ArrayList<String> facts = scraper.queryDatabase("red bell pepper");
-	    });
-	//TODO
+		ArrayList<String> facts = scraper.queryDatabase("red bell pepper");//raw data to be organized
 
+		for(String s: facts)
+		    System.out.println(s);
+		for (ListIterator<String> i = facts.listIterator(6); i.nextIndex() < facts.size() - 1; ){
+		    String nutrientType = i.next();
+		    String percent = i.next();
+		    // System.out.println(nutrientType);
+		    //System.out.println(facts.get(i.nextIndex()));
+		    Nutrient potNut = new Nutrient(nutrientType, percent);
+		    if (!tableList.contains(potNut)){
+			tableList.add(potNut);
+			}
+		  
+		}
+		
+		
+		
+		table.setItems(tableList);
+	    } );
+	    
+	//TODO
+	
 	mid.setVgap(10);
 	mid.setHgap(5);
 	mid.add(groceryText, 0, 4);
 	mid.add(foodSelection, 1, 4);
 	mid.add(searchButton,4, 4);
-	    
+	mid.add(table,0,10);
 	this.appPane.setCenter(mid);
     }
 }

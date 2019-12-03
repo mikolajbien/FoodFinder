@@ -64,8 +64,13 @@ public class Scraper{
 			continue;
 		    }
 		    else{
-			Facts.add(td.text());//stick text into a list
-			System.out.println(td.text());
+			String s = td.text().trim();
+
+			Facts.add(s);//stick text into a list
+
+			if (td.text().contains("Sugar")){//match the sugar entry to the other nutrients
+			    Facts.add("N/A");
+			}
 		    }
 		}
 	    }
@@ -74,8 +79,7 @@ public class Scraper{
 	    if (s.contains("•")){
 		i.remove();
 	    }
-	    else
-		System.out.println(s);
+
 	}
 	    
 	return Facts;

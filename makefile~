@@ -1,3 +1,4 @@
 compileandrun:
 	mvn compile
+	mvn package
 	java -cp target/classes/ AppPack.Driver

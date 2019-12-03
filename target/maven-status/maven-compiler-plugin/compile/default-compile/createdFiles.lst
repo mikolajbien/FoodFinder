@@ -1,3 +1,5 @@
 AppPack/Driver.class
-AppPack/FoodFinder$1.class
 AppPack/FoodFinder.class
+AppPack/FoodFinder$Nutrient.class
+AppPack/FoodFinder$1.class
+AppPack/Scraper.class
