@@ -17,6 +17,7 @@ public class Scraper{
 	
     }
     public ArrayList<String> queryDatabase(String item){
+	System.out.println(item);
 	String url = "https://www.nutritionvalue.org/";
 	Connection.Response resp = null;
 	Document respDoc = null;
@@ -41,8 +42,8 @@ public class Scraper{
 	    e.printStackTrace();
 	}
 
-	Element firstRowOfResult = resultsDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2)");
-	Element resultText = firstRowOfResult.selectFirst("td.results.left");
+	//	Element firstRowOfResult = resultsDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2)");
+	Element resultText = resultsDoc.selectFirst("td.results.left");
 	Element linkToInfo = resultText.selectFirst("a");
 	//System.out.println(linkToInfo);
 	String Link = linkToInfo.absUrl("href");

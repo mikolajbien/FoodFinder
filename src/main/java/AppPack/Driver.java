@@ -17,7 +17,7 @@ public class Driver extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("A Food Price Checker");
+        primaryStage.setTitle("A Nutriton Facts Checker");
 	primaryStage.setResizable(false);
 
         
@@ -25,7 +25,7 @@ public class Driver extends Application {
 	
 	
 	FoodFinder app = new FoodFinder(root, primaryStage);
-        primaryStage.setScene(new Scene(root, 675, 500));
+        primaryStage.setScene(new Scene(root, 675, 675));
         primaryStage.show();
     }
 }
