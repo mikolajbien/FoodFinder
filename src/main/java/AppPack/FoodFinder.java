@@ -36,6 +36,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -48,9 +49,10 @@ import java.util.regex.Matcher;
 public class FoodFinder{
     /**
      * This inner class represents a nutrient to be displayed in a TableView
+     * It handles further parsing of nutrients from the scraper so that the raw values may be easily manipulated
      */
     public static class Nutrient{
-	public enum UNITS{G,MG,NONE}; 
+public enum UNITS{G,MG,NONE}; 
 	private String name;
 	private String dailyVal;
 	private int dailyValInt;
@@ -68,10 +70,12 @@ public class FoodFinder{
 	public Nutrient(String name, String dailyVal){
 	    this.name = name;
 	    this.dailyVal = dailyVal;
-	    try{
-		this.dailyValInt = Integer.parseInt(dailyVal);
-	    }catch(NumberFormatException e){
-		this.dailyValInt = -1;
+	    Matcher m = Pattern.compile("\\d").matcher(this.dailyVal);
+	    if (m.find()){
+		this.dailyValInt = Integer.parseInt(m.group());
+	    }
+	    else{
+		this.dailyValInt = -1;//placeholder for nutrients who do not have a daily value
 	    }
 	    
 	    if ((this.name.contains("Vitamin")) || (this.name.contains("Iron")) || this.name.contains("Calcium")){//case where the nutrient is a vitamin/mineral
@@ -80,15 +84,20 @@ public class FoodFinder{
 		this.amountDouble = -1;
 		this.amountString = "N/A";
 	    }
-	    else{
+	    else{//parsing raw amount out of string
 		this.isMineral = false;
 		
-		Matcher m = Pattern.compile("\\d+\\.\\d+|\\d+").matcher(this.name);//creating matcher using regex
-		
-		if(m.find()){
-		    this.amountString = m.group();
+		Matcher m1 = Pattern.compile("\\d+\\.\\d+").matcher(this.name);//creating matcher using regex
+		Matcher m2 = Pattern.compile("\\d+").matcher(this.name);
+		int lengthOfAmount = Double.toString(amountDouble).length();
+		if(m1.find()){
+		    this.amountString = m1.group();
 		    this.amountDouble = Double.parseDouble(this.amountString);
-		    
+		    lengthOfAmount += 2;
+		}
+		else if (m2.find()){
+		    this.amountString = m2.group();
+		    this.amountDouble = Double.parseDouble(this.amountString);
 		}
 		else{
 		    this.amountString = "N/A";
@@ -96,27 +105,21 @@ public class FoodFinder{
 		}
 		
 		
-	    
 		
-		int lengthOfAmount = Double.toString(amountDouble).length();
 		if (this.name.contains("mg")){
 		    this.Unit = UNITS.MG;
-		    this.name = this.name.substring(0, this.name.length()  - 1 - lengthOfAmount );
+		    this.name = this.name.substring(0, this.name.length()   - 1 - lengthOfAmount );
 		    this.amountString += "mg";
 		}
 		else{
 		    this.Unit = UNITS.G;
-		    this.name = this.name.substring(0, this.name.length() - 1  - lengthOfAmount - 1);
+		    this.name = this.name.substring(0, this.name.length()   -  lengthOfAmount   );
 		    this.amountString += "g";
 		}
 	    }
 	}
 	
     
-	public Nutrient(String name){
-	    this.name = name;
-	    this.dailyVal = "N/A";
-	}
 	public String getName(){
 	    return this.name;
 	}
@@ -142,7 +145,25 @@ public class FoodFinder{
 	@Override
 	public boolean equals(Object o){
 	    Nutrient n = (Nutrient)o;
-	    return ((this.name.equals(n.getName())) && (this.dailyVal.equals(n.getDailyVal())));
+	    return (this.name.equals(n.getName()));
+	}
+	public void scale(double multiplier) throws IllegalArgumentException{
+	    if (multiplier < 0 ){
+		throw new IllegalArgumentException("Cannot multiply nutrient values by a negative number");
+	    }
+	    if (!isMineral){
+		this.amountDouble = this.amountDouble * multiplier;
+	    }
+	    if (this.Unit == UNITS.G){
+		this.amountString = amountDouble + "g";
+	    }
+	    else if (this.Unit == UNITS.MG){
+		this.amountString = amountDouble + "mg";
+	    }
+	    if (!(this.dailyVal.equals("N/A"))){
+		    this.dailyValInt = (int)(dailyValInt * multiplier);
+		    this.dailyVal = dailyValInt + " %";
+		}
 	}
     }
     private BorderPane appPane;
@@ -240,6 +261,9 @@ public class FoodFinder{
 	Collections.sort(foodSelection.getItems());
 
 	
+
+
+	
 	Button searchButton = new Button("Search");
 	TableView<Nutrient> table = new TableView<Nutrient>();
 	table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -254,9 +278,22 @@ public class FoodFinder{
 	
 	table.getColumns().addAll(nutrientCol, amountCol, percentCol);//adding column names to the table
 	ObservableList<Nutrient> tableList = FXCollections.observableArrayList();
-	Text calories = new Text();
+	Text caloriesText = new Text();
+	Text gramsText = new Text("Amount (grams)");
+	TextField amountField = new TextField("100");
+	amountField.setPromptText("# of grams");
+	amountField.setPrefWidth(100);
 	searchButton.setOnAction(e ->{//search
 		table.getItems().clear();
+		double desiredAmount = 0;
+		try {
+		    desiredAmount = Double.parseDouble(amountField.getText());
+		}catch(NumberFormatException ex){
+		    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select a valid amount!!",ButtonType.CLOSE);
+                    errorAlert.initOwner(this.mainStage);
+                    errorAlert.initModality(Modality.WINDOW_MODAL);
+                    errorAlert.show();
+		}
 		if (foodSelection.getValue() == null){
 		    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select a Food to search!",ButtonType.CLOSE);
 		    errorAlert.initOwner(this.mainStage);
@@ -266,7 +303,14 @@ public class FoodFinder{
 		else{
 		    Scraper scraper = new Scraper();
 		    ArrayList<String> facts = scraper.queryDatabase(foodSelection.getValue());//raw data to be organized
-		    calories.setText(facts.get(4));
+		    Matcher m = Pattern.compile("\\d+").matcher(facts.get(4));
+		    m.find();
+		    String s1 = m.group();
+		    System.out.println(s1);
+		    int calories;
+		    calories = Integer.parseInt(s1);
+		    calories = ((int)(desiredAmount /100)) * calories;
+		    caloriesText.setText(Integer.toString(calories));
 		    for(String s: facts)
 			System.out.println(s);
 		    for (ListIterator<String> i = facts.listIterator(6); i.nextIndex() < facts.size() - 1; ){//loop to add items into table
@@ -277,6 +321,7 @@ public class FoodFinder{
 
 			Nutrient potNut = new Nutrient(nutrientType, percent);
 			if (!tableList.contains(potNut)){
+			    potNut.scale(desiredAmount / 100);
 			    tableList.add(potNut);
 			}
 			
@@ -288,6 +333,11 @@ public class FoodFinder{
 		}
 	    } );
 	
+	 
+
+
+
+	
 	//TODO
 	
 	mid.setVgap(7);
@@ -295,7 +345,9 @@ public class FoodFinder{
 	mid.add(groceryText, 3, 4);
 	mid.add(foodSelection, 4, 4);
 	mid.add(searchButton,5, 4);
-	mid.add(calories,3,6);
+	mid.add(caloriesText,3,6);
+	mid.add(gramsText,3,7);
+	mid.add(amountField,4,7);
 	//mid.add(table,1,10);
 	this.appPane.setCenter(mid);
 
