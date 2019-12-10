@@ -8,7 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.geometry.Insets; 
+import javafx.geometry.Insets;
+import javafx.scene.image.Image;
 public class Driver extends Application {
     public static void main(String[] args) {
 	
@@ -19,7 +20,7 @@ public class Driver extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("A Nutriton Facts Checker");
 	primaryStage.setResizable(false);
-
+	
         
         BorderPane root = new BorderPane();
 	

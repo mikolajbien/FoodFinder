@@ -70,7 +70,7 @@ public enum UNITS{G,MG,NONE};
 	public Nutrient(String name, String dailyVal){
 	    this.name = name;
 	    this.dailyVal = dailyVal;
-	    Matcher m = Pattern.compile("\\d").matcher(this.dailyVal);
+	    Matcher m = Pattern.compile("\\d+").matcher(this.dailyVal);
 	    if (m.find()){
 		this.dailyValInt = Integer.parseInt(m.group());
 	    }
@@ -89,15 +89,18 @@ public enum UNITS{G,MG,NONE};
 		
 		Matcher m1 = Pattern.compile("\\d+\\.\\d+").matcher(this.name);//creating matcher using regex
 		Matcher m2 = Pattern.compile("\\d+").matcher(this.name);
-		int lengthOfAmount = Double.toString(amountDouble).length();
+		
+		int lengthOfAmount = 0;
+		
 		if(m1.find()){
 		    this.amountString = m1.group();
 		    this.amountDouble = Double.parseDouble(this.amountString);
-		    lengthOfAmount += 2;
+		    lengthOfAmount = amountString.length();
 		}
 		else if (m2.find()){
 		    this.amountString = m2.group();
 		    this.amountDouble = Double.parseDouble(this.amountString);
+		    lengthOfAmount = amountString.length();
 		}
 		else{
 		    this.amountString = "N/A";
@@ -108,12 +111,12 @@ public enum UNITS{G,MG,NONE};
 		
 		if (this.name.contains("mg")){
 		    this.Unit = UNITS.MG;
-		    this.name = this.name.substring(0, this.name.length()   - 1 - lengthOfAmount );
+		    this.name = this.name.substring(0, this.name.length()   - 2 - lengthOfAmount );
 		    this.amountString += "mg";
 		}
 		else{
 		    this.Unit = UNITS.G;
-		    this.name = this.name.substring(0, this.name.length()   -  lengthOfAmount   );
+		    this.name = this.name.substring(0, this.name.length()   -  lengthOfAmount - 1   );
 		    this.amountString += "g";
 		}
 	    }
