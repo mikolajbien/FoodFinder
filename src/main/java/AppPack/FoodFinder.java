@@ -52,13 +52,13 @@ public class FoodFinder{
      * It handles further parsing of nutrients from the scraper so that the raw values may be easily manipulated
      */
     public static class Nutrient{
-public enum UNITS{G,MG,NONE}; 
+	public enum UNITS{G,MG,MCG}; 
 	private String name;
 	private String dailyVal;
 	private int dailyValInt;
 	private String amountString;
 	private double amountDouble;
-	private boolean isMineral;
+	
 	private UNITS Unit;
 	/**
 	 * Constructor which sets respective fields
@@ -78,48 +78,47 @@ public enum UNITS{G,MG,NONE};
 		this.dailyValInt = -1;//placeholder for nutrients who do not have a daily value
 	    }
 	    
-	    if ((this.name.contains("Vitamin")) || (this.name.contains("Iron")) || this.name.contains("Calcium")){//case where the nutrient is a vitamin/mineral
-		this.isMineral = true;
-		this.Unit = UNITS.NONE;
-		this.amountDouble = -1;
+	    
+
+	    
+	    Matcher m1 = Pattern.compile("\\d+\\.\\d+").matcher(this.name);//creating matcher using regex
+	    Matcher m2 = Pattern.compile("\\d+").matcher(this.name);
+	    
+	    int lengthOfAmount = 0;
+	    
+	    if(m1.find()){
+		this.amountString = m1.group();
+		this.amountDouble = Double.parseDouble(this.amountString);
+		lengthOfAmount = amountString.length();
+	    }
+	    else if (m2.find()){
+		this.amountString = m2.group();
+		this.amountDouble = Double.parseDouble(this.amountString);
+		lengthOfAmount = amountString.length();
+	    }
+	    else{
 		this.amountString = "N/A";
+		this.amountDouble = -1;
 	    }
-	    else{//parsing raw amount out of string
-		this.isMineral = false;
-		
-		Matcher m1 = Pattern.compile("\\d+\\.\\d+").matcher(this.name);//creating matcher using regex
-		Matcher m2 = Pattern.compile("\\d+").matcher(this.name);
-		
-		int lengthOfAmount = 0;
-		
-		if(m1.find()){
-		    this.amountString = m1.group();
-		    this.amountDouble = Double.parseDouble(this.amountString);
-		    lengthOfAmount = amountString.length();
-		}
-		else if (m2.find()){
-		    this.amountString = m2.group();
-		    this.amountDouble = Double.parseDouble(this.amountString);
-		    lengthOfAmount = amountString.length();
-		}
-		else{
-		    this.amountString = "N/A";
-		    this.amountDouble = -1;
-		}
-		
-		
-		
-		if (this.name.contains("mg")){
-		    this.Unit = UNITS.MG;
-		    this.name = this.name.substring(0, this.name.length()   - 2 - lengthOfAmount );
-		    this.amountString += "mg";
-		}
-		else{
-		    this.Unit = UNITS.G;
-		    this.name = this.name.substring(0, this.name.length()   -  lengthOfAmount - 1   );
-		    this.amountString += "g";
-		}
+	    
+	    
+	    
+	    if (this.name.contains("mg")){
+		this.Unit = UNITS.MG;
+		this.name = this.name.substring(0, this.name.length()   - 2 - lengthOfAmount );
+		this.amountString += "mg";
 	    }
+	    else if (this.name.contains("mcg")){
+		this.Unit = UNITS.MCG;
+		this.name = this.name.substring(0, this.name.length() - 3 - lengthOfAmount);
+		this.amountString += "mcg";
+	    }
+	    else{
+		this.Unit = UNITS.G;
+		this.name = this.name.substring(0, this.name.length()   -  lengthOfAmount - 1   );
+		this.amountString += "g";
+	    }
+	    
 	}
 	
     
@@ -154,15 +153,19 @@ public enum UNITS{G,MG,NONE};
 	    if (multiplier < 0 ){
 		throw new IllegalArgumentException("Cannot multiply nutrient values by a negative number");
 	    }
-	    if (!isMineral){
-		this.amountDouble = this.amountDouble * multiplier;
-	    }
+	    //multiply amount by multiplier
+	    this.amountDouble = this.amountDouble * multiplier;
+	    //add correct units
 	    if (this.Unit == UNITS.G){
 		this.amountString = amountDouble + "g";
 	    }
 	    else if (this.Unit == UNITS.MG){
 		this.amountString = amountDouble + "mg";
 	    }
+	    else{
+		this.amountString = amountDouble + "mcg";
+	    }
+	    //change dailyVal only if the nutrient has one
 	    if (!(this.dailyVal.equals("N/A"))){
 		    this.dailyValInt = (int)(dailyValInt * multiplier);
 		    this.dailyVal = dailyValInt + " %";
@@ -211,7 +214,7 @@ public enum UNITS{G,MG,NONE};
 		    Buttons.getChildren().addAll(closeButton, sourceCode);
 		    rootOfAbout.getChildren().addAll(aboutText, Buttons);
 
-		    //settings for the new window
+	    //settings for the new window
 		    Stage aboutWindow = new Stage();
 		    aboutWindow.setResizable(false);
 		    aboutWindow.setTitle("About");
@@ -281,6 +284,7 @@ public enum UNITS{G,MG,NONE};
 	
 	table.getColumns().addAll(nutrientCol, amountCol, percentCol);//adding column names to the table
 	ObservableList<Nutrient> tableList = FXCollections.observableArrayList();
+	
 	Text caloriesText = new Text();
 	Text gramsText = new Text("Amount (grams)");
 	TextField amountField = new TextField("100");
@@ -296,27 +300,55 @@ public enum UNITS{G,MG,NONE};
                     errorAlert.initOwner(this.mainStage);
                     errorAlert.initModality(Modality.WINDOW_MODAL);
                     errorAlert.show();
+		    return;
+		}
+		finally{
+		    if (desiredAmount < 0 || desiredAmount > 10000){
+			Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select an amount 0 - 10000",ButtonType.CLOSE);
+			errorAlert.initOwner(this.mainStage);
+			errorAlert.initModality(Modality.WINDOW_MODAL);
+			errorAlert.show();
+			return;
+			
+		    }
 		}
 		if (foodSelection.getValue() == null){
 		    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select a Food to search!",ButtonType.CLOSE);
 		    errorAlert.initOwner(this.mainStage);
 		    errorAlert.initModality(Modality.WINDOW_MODAL);
 		    errorAlert.show();
+		    return;
 		}
+		
 		else{
 		    Scraper scraper = new Scraper();
-		    ArrayList<String> facts = scraper.queryDatabase(foodSelection.getValue());//raw data to be organized
+		    ArrayList<String> facts = null;
+		    try{
+			facts = scraper.queryDatabase(foodSelection.getValue());//raw data to be organized
+		    }catch(Exception ex){
+			StackTraceElement[] stackTrace = ex.getStackTrace();
+			String stackTraceString = "";
+			for (int i = 0; i < 3; i++){
+			    stackTraceString += stackTrace[i].toString() + "\n";
+			}
+			Alert errorAlert = new Alert(Alert.AlertType.ERROR, "There is an internal issue with the application\nPlease show this information to the developer:\n" + stackTraceString ,ButtonType.CLOSE);
+			errorAlert.initOwner(this.mainStage);
+			errorAlert.initModality(Modality.WINDOW_MODAL);
+			errorAlert.show();
+			Platform.exit();
+			System.exit(1);
+		    }
 		    Matcher m = Pattern.compile("\\d+").matcher(facts.get(4));
 		    m.find();
 		    String s1 = m.group();
 		    System.out.println(s1);
-		    int calories;
+		    int calories = 0;
 		    calories = Integer.parseInt(s1);
 		    calories = ((int)(desiredAmount /100)) * calories;
-		    caloriesText.setText(Integer.toString(calories));
+		    caloriesText.setText("Calories: " +  Integer.toString(calories));
 		    for(String s: facts)
 			System.out.println(s);
-		    for (ListIterator<String> i = facts.listIterator(6); i.nextIndex() < facts.size() - 1; ){//loop to add items into table
+		    for (ListIterator<String> i = facts.listIterator(7); i.nextIndex() < facts.size() - 1; ){//loop to add items into table
 			String nutrientType = i.next();
 			
 			String percent = i.next();
@@ -348,14 +380,15 @@ public enum UNITS{G,MG,NONE};
 	mid.add(groceryText, 3, 4);
 	mid.add(foodSelection, 4, 4);
 	mid.add(searchButton,5, 4);
-	mid.add(caloriesText,3,6);
-	mid.add(gramsText,3,7);
-	mid.add(amountField,4,7);
+	mid.add(caloriesText,3,7);
+	mid.add(gramsText,3,6);
+	mid.add(amountField,4,6);
 	//mid.add(table,1,10);
 	this.appPane.setCenter(mid);
 
 
 
+	//Add table to bottom
 	VBox Bottom = new VBox(15);
 	Bottom.setPadding(new Insets(10,100,20,100));
 	Bottom.getChildren().add(table);

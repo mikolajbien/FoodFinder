@@ -11,7 +11,10 @@ import java.util.ArrayList;
 import java.util.ListIterator;
 public class Scraper{
 
-
+    /**
+     * A class representing a web scraper for the website nutritionvalues.org
+     * @author Mikolaj Bien
+     */
   
     public Scraper(){
 	
@@ -60,29 +63,24 @@ public class Scraper{
 	Element table = infoDoc.selectFirst("table.center.zero.wide.fixed table.center.zero");
 	ArrayList<String> Facts = new ArrayList<String>();	
 	for (Element row : table.select("tr")){
-		for(Element td : row.select("td")){
-		    if ((td.text().equals("")) || (td.text().contains("•"))){//skip bars in block and entries with dot
-			continue;
-		    }
-		    else{
-			String s = td.text().trim();
-
-			Facts.add(s);//stick text into a list
-
-			if (td.text().contains("Sugar")){//match the sugar entry to the other nutrients
-			    Facts.add("N/A");
-			}
+	    for(Element td : row.select("td")){
+		if ((td.text().equals("")) || (td.text().contains("•"))){//skip bars in block and entries with dot
+		    continue;
+		}
+		else{
+		    String s = td.text().trim();
+		    
+		    Facts.add(s);//stick text into a list
+		    
+		    if (td.text().contains("Sugar")){//match the sugar entry to the other nutrients
+			Facts.add("N/A");
 		    }
 		}
 	    }
-	for(ListIterator<String> i = Facts.listIterator(); i.hasNext();){//remove
-	    String s = i.next();
-	    if (s.contains("•")){
-		i.remove();
-	    }
-
 	}
-	    
+	//ArrayList<FoodFinder.Nutrient> nutList = new ArrayList<FoodFinder.Nutrient>;
+	
+	
 	return Facts;
 	
     }
