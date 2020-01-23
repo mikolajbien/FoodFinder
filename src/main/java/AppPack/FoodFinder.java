@@ -39,7 +39,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
+import java.text.DecimalFormat;
 
 /**
  * This Class represents an instance of a FoodFinder application
@@ -121,49 +121,81 @@ public class FoodFinder{
 	    
 	}
 	
-    
+	/**
+	 * Getter method for the name field
+	 * @return the name field of this nutrient
+	 */
 	public String getName(){
 	    return this.name;
 	}
+	/**
+	 * Getter method for the daily value field
+	 * @return the daily value of this nutrient
+	 */
 	public String getDailyVal(){
 	    return this.dailyVal;
 	}
-	
+	/**
+	 * Method that returns a simplestringproperty for the name for use with JavaFx
+	 * @return a StringProperty representing the name field for this nutrient
+	 */
 	public StringProperty nameProperty(){
 	    StringProperty property = new SimpleStringProperty();
 	    property.set(this.name);
 	    return property;
 	}
+	/**
+	 * Method that returns a simpleStringProperty for the the daily value for use with JavaFx
+	 * @return a StringProperty representing the daily value field for this nutrient 
+	 */
 	public StringProperty dailyValProperty(){
 	    StringProperty property = new SimpleStringProperty();
 	    property.set(this.dailyVal);
 	    return property;
 	}
+	/**
+	 * Method that returns a simpleStringProperty for the amount of the nutrient for use with JavaFx
+	 * @return a StringProperty representing the amount field for this nutrient
+	 */
 	public StringProperty amountStringProperty(){
 	    StringProperty property = new SimpleStringProperty();
 	    property.set(this.amountString);
 	    return property;
 	}
+	/**
+	 * An override of java.lang.Object's equals method
+	 * @param o The object to compare this Nutrient to
+	 * @return true if this nutrient's name is equivalent to another nutrient's name 
+	 */
 	@Override
 	public boolean equals(Object o){
-	    Nutrient n = (Nutrient)o;
-	    return (this.name.equals(n.getName()));
+	    if (o instanceof Nutrient){
+		Nutrient n = (Nutrient)o;
+		return (this.name.equals(n.getName()));
+	    }
+	    else
+		return super.equals(o);
 	}
+	/**
+	 * Scales the amount of a nutrient by a given multiplier
+	 * @param multiplier the multiplier to multiply the amount by
+	 */
 	public void scale(double multiplier) throws IllegalArgumentException{
 	    if (multiplier < 0 ){
 		throw new IllegalArgumentException("Cannot multiply nutrient values by a negative number");
 	    }
 	    //multiply amount by multiplier
 	    this.amountDouble = this.amountDouble * multiplier;
+	    DecimalFormat df = new DecimalFormat("0.00");
 	    //add correct units
 	    if (this.Unit == UNITS.G){
-		this.amountString = amountDouble + "g";
+		this.amountString = df.format(amountDouble) + "g";
 	    }
 	    else if (this.Unit == UNITS.MG){
-		this.amountString = amountDouble + "mg";
+		this.amountString = df.format(amountDouble) + "mg";
 	    }
 	    else{
-		this.amountString = amountDouble + "mcg";
+		this.amountString = df.format(amountDouble) + "mcg";
 	    }
 	    //change dailyVal only if the nutrient has one
 	    if (!(this.dailyVal.equals("N/A"))){
@@ -176,7 +208,14 @@ public class FoodFinder{
     private Stage mainStage;
     private static final double BUTTON_WIDTH = 60;
     private static final double BUTTON_HEIGHT = 30;
-   
+
+
+    /**
+     * Main constructor of a FoodFinder application
+     * Sets up a pane and a stage to be used as a FoodFinder application
+     * @param BorderPane A BorderPane to be use as the main pane for this FoodFinder application
+     * @param primaryStage The main Stage used in the application
+     */
     protected FoodFinder(BorderPane pane, Stage primaryStage){
 	this.appPane = pane;
 	this.mainStage = primaryStage;
@@ -184,6 +223,9 @@ public class FoodFinder{
 	setupMid();
 	
     }
+    /**
+     * Helper Method to that sets up the menus, top bar, and the about window 
+     */
     private void setupTop(){
 	VBox top = new VBox(15);//container for the top part of the application
 	top.setAlignment(Pos.CENTER);
@@ -214,7 +256,7 @@ public class FoodFinder{
 		    Buttons.getChildren().addAll(closeButton, sourceCode);
 		    rootOfAbout.getChildren().addAll(aboutText, Buttons);
 
-	    //settings for the new window
+		    //settings for the new window
 		    Stage aboutWindow = new Stage();
 		    aboutWindow.setResizable(false);
 		    aboutWindow.setTitle("About");
@@ -254,6 +296,10 @@ public class FoodFinder{
 	
 	this.appPane.setTop(top);
     }
+    /**
+     * Sets up the "middle" and "bottom" part of the GUI application
+     * Also contains the logic for scraping and preparing the the raw scraped data to be parsed
+     */
     private void setupMid(){//has code to set up the main part of the app and the logic for scraping nutrition facts
 	GridPane mid = new GridPane();//root for middle
 	mid.setPadding(new Insets(15,100,25,100));
@@ -266,19 +312,18 @@ public class FoodFinder{
 	foodSelection.getItems().addAll("Red Apple","Raspberries","Blueberries","Carrots","Bananas","Avocados","Blackberries","Jalapenos","Pork Salami","Pan-Fried Pork Bacon", "White Bread", "Peanut Butter, smooth style", "Onion", "Garlic", "Fried Chicken Breast" );
 	Collections.sort(foodSelection.getItems());
 
-	
-
 
 	
 	Button searchButton = new Button("Search");
 	TableView<Nutrient> table = new TableView<Nutrient>();
 	table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
+	//Factory for Nutrient name
 	TableColumn<Nutrient, String> nutrientCol = new TableColumn<Nutrient, String>("Nutrient");
 	nutrientCol.setCellValueFactory(new PropertyValueFactory<Nutrient, String>("name"));
-
+	//Factory for dailvals
 	TableColumn<Nutrient, String> percentCol = new TableColumn("% Daily Value");
 	percentCol.setCellValueFactory(new PropertyValueFactory<Nutrient, String>("dailyVal"));
+	//Factory for nutrient amounts and wieghts
 	TableColumn<Nutrient, String> amountCol = new TableColumn("Amount");
 	amountCol.setCellValueFactory(new PropertyValueFactory<Nutrient, String>("amountString"));
 	
@@ -293,25 +338,20 @@ public class FoodFinder{
 	searchButton.setOnAction(e ->{//search
 		table.getItems().clear();
 		double desiredAmount = 0;
-		try {
+		try {//checking if the amount input is valid
 		    desiredAmount = Double.parseDouble(amountField.getText());
+		    if (desiredAmount < 0 || desiredAmount > 10000){
+			throw new NumberFormatException();
+		    }
 		}catch(NumberFormatException ex){
-		    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select a valid amount!!",ButtonType.CLOSE);
+		    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select a valid amount 0 - 10000!!",ButtonType.CLOSE);
                     errorAlert.initOwner(this.mainStage);
                     errorAlert.initModality(Modality.WINDOW_MODAL);
                     errorAlert.show();
 		    return;
 		}
-		finally{
-		    if (desiredAmount < 0 || desiredAmount > 10000){
-			Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select an amount 0 - 10000",ButtonType.CLOSE);
-			errorAlert.initOwner(this.mainStage);
-			errorAlert.initModality(Modality.WINDOW_MODAL);
-			errorAlert.show();
-			return;
-			
-		    }
-		}
+		
+		
 		if (foodSelection.getValue() == null){
 		    Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Please select a Food to search!",ButtonType.CLOSE);
 		    errorAlert.initOwner(this.mainStage);
@@ -367,14 +407,14 @@ public class FoodFinder{
 	    table.setItems(tableList);
 		}
 	    } );
-	
-	 
+	//when user presses "enter" key when the textfield is clicked, the scraper executes
+	amountField.setOnAction(searchButton.getOnAction());	
 
 
 
 	
-	//TODO
 	
+	//add control nodes to the gridpane
 	mid.setVgap(7);
 	mid.setHgap(5);
 	mid.add(groceryText, 3, 4);
@@ -383,7 +423,7 @@ public class FoodFinder{
 	mid.add(caloriesText,3,7);
 	mid.add(gramsText,3,6);
 	mid.add(amountField,4,6);
-	//mid.add(table,1,10);
+	//set the gridpane to be the middle of the borderpane
 	this.appPane.setCenter(mid);
 
 

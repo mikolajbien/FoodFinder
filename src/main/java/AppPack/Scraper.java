@@ -34,7 +34,7 @@ public class Scraper{
 	FormElement form = (FormElement)respDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > form");
 	Element searchField = form.selectFirst("#food_query");
 	searchField.val(item);
-	//	System.out.println(searchField);
+
 	
 	Connection.Response results = null;
 	Document resultsDoc = null;
@@ -45,12 +45,12 @@ public class Scraper{
 	    e.printStackTrace();
 	}
 
-	//	Element firstRowOfResult = resultsDoc.selectFirst("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2)");
+
 	Element resultText = resultsDoc.selectFirst("td.results.left");
 	Element linkToInfo = resultText.selectFirst("a");
-	//System.out.println(linkToInfo);
+
 	String Link = linkToInfo.absUrl("href");
-	//System.out.println(Link);
+
 	Connection.Response infoResp = null;
 	Document infoDoc = null;
 	try{
@@ -78,7 +78,7 @@ public class Scraper{
 		}
 	    }
 	}
-	//ArrayList<FoodFinder.Nutrient> nutList = new ArrayList<FoodFinder.Nutrient>;
+
 	
 	
 	return Facts;

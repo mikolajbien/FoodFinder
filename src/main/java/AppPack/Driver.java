@@ -10,6 +10,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
+
 public class Driver extends Application {
     public static void main(String[] args) {
 	
@@ -20,7 +21,9 @@ public class Driver extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("A Nutriton Facts Checker");
 	primaryStage.setResizable(false);
-	
+	java.net.URL s = Driver.class.getResource("/icons8-apple-64.png");
+	System.out.println(s);
+	primaryStage.getIcons().add(new Image(Driver.class.getResourceAsStream("/icons8-apple-64.png")));
         
         BorderPane root = new BorderPane();
 	
